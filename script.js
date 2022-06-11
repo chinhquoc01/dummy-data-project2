@@ -9,6 +9,17 @@ let subject = ['Mỹ thuật', 'Âm nhạc', 'Thể dục', 'Tiếng Việt', 'K
 
 let address = ['Hoàn Kiếm', 'Đống Đa', 'Tây Hồ', 'Hai Bà Trưng', 'Cầu Giấy', 'Hoàng Mai', 'Nam Từ Liêm', 'Quốc Oai']
 
+async function getGender(name) {
+    let gender = await fetch('https://uit-classifier.herokuapp.com/api/predict?name=' + name)
+    let result = await gender.json()
+    if (result.results[0].prediction === 'Female') {
+        return 1
+    }
+    else if (result.results[0].prediction === 'Male') {
+        return 0
+    }
+}
+
 function randomCharacter(length) {
     var result           = '';
     var characters       = 'abcdefghiklmnopqrs1234567890';
@@ -64,6 +75,7 @@ function generateEmail(name) {
     email += removeVietnameseTones(arr[arr.length-1]) + '_' + randomCharacter(3) + '@gmail.com'
     return email.toLowerCase()
 }
+
 function generateAge(min = 20, max = 30) {
 
     // find diff
@@ -109,7 +121,7 @@ function generateDate(start, end, monthInput = null, dateInput = null) {
 }
 
 let teacher = []
-function getTeacher(number = 50) {
+async function getTeacher(number = 50) {
     for (let i = 0; i < number; i++) {
         let random = Math.floor(Math.random() * nameObj.length)
         let row = `(uuid_generate_v4(), `
@@ -118,14 +130,14 @@ function getTeacher(number = 50) {
         row += generateAge() + ', '
         row += `'` + nameObj[random].full_name + `', `
         row += `'` + generateEmail(nameObj[random].full_name) + `', `
-        row += Math.floor(Math.random() * 2) + `, `
+        row += await getGender(nameObj[random].full_name) + `, `
         row += `'` + randomPhone(9) + `'), `
-        // console.log(row);
+        console.log(row);
         teacher.push(row)
     }
 
 }
-
+// await getTeacher(3)
 
 let classIds = ['1755dc64-e739-4e7e-862e-c7938a089b10', 
 '267312fe-c252-4a58-a748-acc68a5b085a', 
@@ -140,7 +152,7 @@ let classIds = ['1755dc64-e739-4e7e-862e-c7938a089b10',
 // 	VALUES (?, ?, ?, ?, ?, ?, ?);
 
 let parentIds = []
-function getParent(number = 50) {
+async function getParent(number = 50) {
     parentIds = []
     for (let i = 0; i < number; i++) {
         let uuid = uuidv4()
@@ -152,7 +164,7 @@ function getParent(number = 50) {
         row += `'` + address[Math.floor(Math.random() * subject.length)] + `', `
         row += `'` + generateDate(1987, 1997) + `', `
         row += `'` + generateEmail(nameObj[random].full_name) + `', `
-        row += Math.floor(Math.random() * 2) + `),`
+        row += await getGender(nameObj[random].full_name) + `), `
         // console.log(row);
     }
 }
@@ -165,7 +177,7 @@ console.log('------------------------');
 // 	student_id, class_id, date_of_birth, parent_id, student_name, student_gender)
 // 	VALUES (?, ?, ?, ?, ?, ?);
 let childIds = []
-function getChild(number = 50) {
+async function getChild(number = 50) {
     childIds = []
     for (let i = 0; i < number; i++) {
         let uuid = uuidv4()
@@ -176,7 +188,7 @@ function getChild(number = 50) {
         row += `'` + generateDate(2017, 2020) + `', `
         row += `'` + parentIds[Math.floor(Math.random() * parentIds.length)] + `', `
         row += `'` + nameObj[random].full_name + `', `
-        row += Math.floor(Math.random() * 2) + `),`
+        row += await getGender(nameObj[random].full_name) + `,) `
         // console.log(row);
     }
 }
@@ -253,4 +265,4 @@ function getFoodMenu(month = null) {
         console.log(row);
     }
 }
-getFoodMenu('06')
+// getFoodMenu('06')
